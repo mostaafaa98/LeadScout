@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LeadScout</title>
+<style>
+:root{
+  --bg:#07111f; --surface:#0d1a2b; --surface2:#102238; --line:#203653;
+  --text:#f2f6fb; --muted:#91a5bf; --primary:#4f8cff; --primary2:#6d5efc;
+  --success:#35d39a; --danger:#ff667d; --warning:#f1c75b;
+  --shadow:0 24px 60px rgba(0,0,0,.24);
+}
+[data-theme="light"]{
+  --bg:#f4f7fb; --surface:#fff; --surface2:#f7f9fc; --line:#dce4ee;
+  --text:#182335; --muted:#68788f; --primary:#356ff0; --primary2:#715cf6;
+  --shadow:0 18px 40px rgba(32,55,90,.10);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:radial-gradient(circle at top right,rgba(79,140,255,.10),transparent 26%),var(--bg);
+  color:var(--text);font-family:Segoe UI,Tahoma,Arial,sans-serif;min-height:100vh
+}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+.app{max-width:1500px;margin:auto;padding:20px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:48px;height:48px;border-radius:16px;background:linear-gradient(135deg,var(--primary),var(--primary2));display:grid;place-items:center;font-weight:900;color:#fff;box-shadow:0 14px 34px rgba(79,140,255,.28)}
+.brand h1{font-size:22px;margin:0}.brand p{font-size:12px;color:var(--muted);margin:4px 0 0}
+.top-actions{display:flex;gap:8px;align-items:center}
+.btn-icon,.server{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:12px;padding:9px 12px}
+.server{font-size:12px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--muted);margin-left:6px}
+.dot.ok{background:var(--success);box-shadow:0 0 0 5px rgba(53,211,154,.1)}
+.dot.bad{background:var(--danger)}
+.layout{display:grid;grid-template-columns:340px 1fr;gap:16px}
+.card{background:rgba(13,26,43,.94);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}
+[data-theme="light"] .card{background:var(--surface)}
+.panel{padding:18px}
+.panel h2{font-size:16px;margin:0 0 14px}
+label{display:block;font-size:12px;color:var(--muted);margin:0 0 7px}
+.input,.select,.textarea{
+  width:100%;border:1px solid var(--line);background:var(--surface2);color:var(--text);
+  border-radius:12px;padding:12px 13px;outline:none
+}
+.input:focus,.select:focus,.textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,140,255,.12)}
+.textarea{min-height:130px;resize:vertical;line-height:1.7}
+.help{color:var(--muted);font-size:11px;margin-top:6px;line-height:1.6}
+.field{margin-bottom:14px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.primary,.secondary,.danger,.success{
+  border-radius:12px;padding:11px 12px;border:1px solid transparent;font-weight:700
+}
+.primary{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff}
+.secondary{background:var(--surface2);color:var(--text);border-color:var(--line)}
+.danger{background:rgba(255,102,125,.10);color:#ff9eac;border-color:rgba(255,102,125,.25)}
+.success{background:rgba(53,211,154,.10);color:#73e0b7;border-color:rgba(53,211,154,.24)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:14px 14px 0}
+.kpi{background:var(--surface2);border:1px solid var(--line);border-radius:14px;padding:12px}
+.kpi small{display:block;color:var(--muted);font-size:11px}.kpi strong{display:block;font-size:22px;margin-top:5px}
+.status{padding:14px}
+.progress{height:10px;background:var(--surface2);border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.progress>span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--primary),var(--success));transition:width .25s}
+.statusline{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:10px}
+.muted{color:var(--muted);font-size:11px}.statusmsg{font-size:12px}
+.locations{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.chip{border:1px solid var(--line);background:var(--surface2);padding:6px 9px;border-radius:999px;font-size:11px}
+.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:0 14px 14px}
+.toolbar .input,.toolbar .select{width:auto;min-width:155px}
+.table-wrap{overflow:auto;border-top:1px solid var(--line);max-height:65vh}
+table{width:100%;border-collapse:collapse;min-width:1120px}
+th,td{padding:11px 10px;border-bottom:1px solid var(--line);white-space:nowrap;text-align:right}
+th{position:sticky;top:0;background:var(--surface);font-size:11px;color:var(--muted);z-index:1;cursor:pointer;user-select:none}
+td{font-size:12px}
+tr:hover td{background:var(--surface2)}
+.empty{padding:48px;text-align:center;color:var(--muted)}
+.link{color:#6fa8ff;text-decoration:none}
+.pill{padding:5px 8px;border-radius:999px;background:var(--surface2);border:1px solid var(--line);font-size:10px}
+.notice{margin-top:12px;padding:10px 12px;background:var(--surface2);border:1px solid var(--line);border-radius:12px;font-size:11px;color:var(--muted);line-height:1.7}
+.error{color:#ff9eac}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.app{padding:10px}.topbar{align-items:flex-start}.row,.actions{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}.toolbar .input,.toolbar .select{width:100%}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">LS</div>
+      <div>
+        <h1>LeadScout</h1>
+        <p>Google Maps Lead Extractor</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <div id="server" class="server"><span class="dot"></span> فحص السيرفر...</div>
+      <button id="themeBtn" class="btn-icon" type="button">☼</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="card panel">
+      <h2>بحث جديد</h2>
+
+      <div class="field">
+        <label>نوع النشاط</label>
+        <input id="category" class="input" placeholder="مثال: مصانع ملابس">
+      </div>
+
+      <div class="field">
+        <label>الأماكن — كل مكان في سطر</label>
+        <textarea id="locations" class="textarea" placeholder="ليبيا
+العراق
+مصر — القاهرة"></textarea>
+        <div class="help">تقدر تبحث في عدة دول أو مدن في نفس العملية. يتم تشغيل بحثين بالتوازي افتراضيًا.</div>
+      </div>
+
+      <div class="field row">
+        <div>
+          <label>عدد النتائج لكل مكان</label>
+          <input id="limit" class="input" type="number" min="1" max="500" value="25">
+        </div>
+        <div>
+          <label>حد أدنى للتقييم</label>
+          <select id="minRating" class="select">
+            <option value="0">الكل</option>
+            <option value="3">3+</option>
+            <option value="3.5">3.5+</option>
+            <option value="4">4+</option>
+            <option value="4.5">4.5+</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="startBtn" class="primary">🚀 بدء الاستخراج</button>
+        <button id="refreshBtn" class="secondary">↻ تحديث</button>
+        <button id="pauseBtn" class="secondary" disabled>⏸ إيقاف مؤقت</button>
+        <button id="resumeBtn" class="secondary" disabled>▶ استكمال</button>
+        <button id="stopBtn" class="danger" disabled>■ إيقاف</button>
+      </div>
+
+      <div id="notice" class="notice">
+        الوضع الحالي: الاستخراج متعدد الأماكن + معالجة التفاصيل بالتوازي + فلترة وترتيب النتائج من الواجهة.
+      </div>
+    </aside>
+
+    <main>
+      <section class="card">
+        <div class="panel">
+          <h2>حالة الاستخراج</h2>
+          <div class="kpis">
+            <div class="kpi"><small>الإجمالي المطلوب</small><strong id="target">0</strong></div>
+            <div class="kpi"><small>النتائج المجمعة</small><strong id="found">0</strong></div>
+            <div class="kpi"><small>تمت المعالجة</small><strong id="processed">0</strong></div>
+            <div class="kpi"><small>التقدم</small><strong id="percent">0%</strong></div>
+          </div>
+          <div class="status">
+            <div class="progress"><span id="bar"></span></div>
+            <div class="statusline">
+              <div id="statusMsg" class="statusmsg"><span class="dot"></span> جاهز</div>
+              <div id="jobText" class="muted">لا توجد عملية</div>
+            </div>
+            <div id="locationChips" class="locations"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" style="margin-top:16px">
+        <div class="panel" style="padding-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+            <h2 style="margin:0">النتائج</h2>
+            <div id="shown" class="muted">0 نتيجة معروضة</div>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <input id="searchFilter" class="input" placeholder="بحث بالاسم أو الهاتف أو العنوان...">
+          <select id="locationFilter" class="select">
+            <option value="">كل الأماكن</option>
+          </select>
+          <select id="sortBy" class="select">
+            <option value="business_name">الاسم</option>
+            <option value="category">التصنيف</option>
+            <option value="phone">رقم الهاتف</option>
+            <option value="rating">التقييم</option>
+            <option value="reviews">عدد المراجعات</option>
+            <option value="address">العنوان</option>
+            <option value="search_location">مكان البحث</option>
+          </select>
+          <select id="sortDir" class="select">
+            <option value="asc">تصاعدي ↑</option>
+            <option value="desc">تنازلي ↓</option>
+          </select>
+          <button id="phoneOnly" class="secondary" type="button">📞 هاتف متوفر فقط</button>
+          <button id="excelBtn" class="success" disabled>⬇ Excel</button>
+          <button id="csvBtn" class="secondary" disabled>⬇ CSV</button>
+        </div>
+
+        <div id="tableArea" class="table-wrap">
+          <div class="empty">ابدأ عملية استخراج لعرض النتائج</div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script>
+let jobId = null;
+let timer = null;
+let results = [];
+let phoneOnly = false;
+
+const $ = id => document.getElementById(id);
+
+function esc(v){return String(v ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function attr(v){return esc(v)}
+function norm(v){return String(v ?? "").trim().toLowerCase()}
+
+async function api(url, options={}){
+  const r = await fetch(url, options);
+  let d = {};
+  try{d=await r.json()}catch(e){}
+  if(!r.ok) throw new Error(d.detail || "فشل الطلب");
+  return d;
+}
+
+function themeInit(){
+  const saved = localStorage.getItem("leadscout-theme");
+  const theme = saved || "dark";
+  document.documentElement.dataset.theme = theme;
+  $("themeBtn").textContent = theme === "dark" ? "☼" : "☾";
+}
+$("themeBtn").onclick=()=>{
+  const next = document.documentElement.dataset.theme==="dark" ? "light" : "dark";
+  document.documentElement.dataset.theme=next;
+  localStorage.setItem("leadscout-theme",next);
+  $("themeBtn").textContent=next==="dark" ? "☼" : "☾";
+};
+themeInit();
+
+async function health(){
+  try{
+    await api("/api/health");
+    $("server").innerHTML='<span class="dot ok"></span> السيرفر متصل';
+  }catch(e){
+    $("server").innerHTML='<span class="dot bad"></span> السيرفر غير متصل';
+  }
+}
+health(); setInterval(health,10000);
+
+function getLocations(){
+  return $("locations").value.split(/\r?\n|,/).map(x=>x.trim()).filter(Boolean)
+    .filter((x,i,a)=>a.findIndex(y=>norm(y)===norm(x))===i);
+}
+
+function renderLocationFilters(){
+  const current=$("locationFilter").value;
+  const vals=[...new Set(results.map(r=>r.search_location).filter(Boolean))];
+  $("locationFilter").innerHTML='<option value="">كل الأماكن</option>'+vals.map(v=>`<option value="${attr(v)}">${esc(v)}</option>`).join("");
+  if(vals.includes(current)) $("locationFilter").value=current;
+}
+
+function filteredSorted(){
+  const q=norm($("searchFilter").value);
+  const loc=$("locationFilter").value;
+  const min=Number($("minRating").value||0);
+  const key=$("sortBy").value;
+  const dir=$("sortDir").value==="desc"?-1:1;
+
+  let arr=results.filter(r=>{
+    if(loc && r.search_location!==loc) return false;
+    if(phoneOnly && !String(r.phone||"").trim()) return false;
+    if(min>0 && (r.rating==null || Number(r.rating)<min)) return false;
+    if(q){
+      const hay=[r.business_name,r.category,r.phone,r.address,r.website,r.search_location,r.maps_url].join(" ");
+      if(!norm(hay).includes(q)) return false;
+    }
+    return true;
+  });
+
+  arr.sort((a,b)=>{
+    let av=a[key], bv=b[key];
+    if(key==="rating"||key==="reviews"){av=Number(av??-1);bv=Number(bv??-1)}
+    else {av=norm(av);bv=norm(bv)}
+    if(av<bv) return -1*dir;
+    if(av>bv) return 1*dir;
+    return 0;
+  });
+  return arr;
+}
+
+function renderTable(){
+  const arr=filteredSorted();
+  $("shown").textContent=`${arr.length} نتيجة معروضة`;
+
+  if(!arr.length){
+    $("tableArea").innerHTML='<div class="empty">لا توجد نتائج مطابقة للفلاتر الحالية</div>';
+    return;
+  }
+
+  $("tableArea").innerHTML=`
+  <table>
+    <thead><tr>
+      <th data-sort="business_name">#</th>
+      <th data-sort="business_name">اسم النشاط</th>
+      <th data-sort="category">التصنيف</th>
+      <th data-sort="phone">الهاتف</th>
+      <th data-sort="rating">التقييم</th>
+      <th data-sort="reviews">المراجعات</th>
+      <th data-sort="search_location">مكان البحث</th>
+      <th data-sort="address">العنوان</th>
+      <th>الموقع</th>
+      <th>Google Maps</th>
+    </tr></thead>
+    <tbody>
+    ${arr.map((r,i)=>`
+      <tr>
+        <td>${i+1}</td>
+        <td>${esc(r.business_name)}</td>
+        <td>${esc(r.category)}</td>
+        <td dir="ltr" style="text-align:right">${esc(r.phone)}</td>
+        <td>${r.rating ?? ""}</td>
+        <td>${r.reviews ?? ""}</td>
+        <td><span class="pill">${esc(r.search_location)}</span></td>
+        <td>${esc(r.address)}</td>
+        <td>${r.website?`<a class="link" target="_blank" href="${attr(r.website)}">فتح</a>`:""}</td>
+        <td>${r.maps_url?`<a class="link" target="_blank" href="${attr(r.maps_url)}">فتح الخريطة</a>`:""}</td>
+      </tr>
+    `).join("")}
+    </tbody>
+  </table>`;
+
+  $("tableArea").querySelectorAll("th[data-sort]").forEach(th=>{
+    th.onclick=()=>{
+      const k=th.dataset.sort;
+      if($("sortBy").value===k){
+        $("sortDir").value=$("sortDir").value==="asc"?"desc":"asc";
+      }else{
+        $("sortBy").value=k; $("sortDir").value="asc";
+      }
+      renderTable();
+    };
+  });
+}
+
+async function loadResults(){
+  if(!jobId) return;
+  try{
+    const d=await api("/api/results/"+jobId);
+    results=d.results||[];
+    renderLocationFilters();
+    renderTable();
+    $("csvBtn").disabled=!results.length;
+  }catch(e){}
+}
+
+function renderStatus(d){
+  $("target").textContent=d.target??0;
+  $("found").textContent=d.found??0;
+  $("processed").textContent=d.processed??0;
+  $("percent").textContent=(d.progress??0)+"%";
+  $("bar").style.width=(d.progress??0)+"%";
+  $("statusMsg").innerHTML=`<span class="dot ${d.state==="finished"?"ok":(d.state==="error"?"bad":"")}"></span>${esc(d.message||"")}`;
+  $("jobText").textContent=d.job_id?`Job: ${d.job_id.slice(0,12)}`:"لا توجد عملية";
+
+  const locs=d.locations||[];
+  $("locationChips").innerHTML=locs.map(l=>{
+    const s=(d.locations_status||{})[l]||{};
+    return `<span class="chip">${esc(l)} — ${s.found||0}/${s.target||d.target_per_location||0} — ${esc(s.state||"queued")}</span>`;
+  }).join("");
+
+  $("pauseBtn").disabled=d.state!=="running";
+  $("resumeBtn").disabled=d.state!=="paused";
+  $("stopBtn").disabled=!["running","paused"].includes(d.state);
+  $("startBtn").disabled=["running","paused"].includes(d.state);
+  $("excelBtn").disabled=!d.has_file;
+
+  if(["finished","stopped","error"].includes(d.state)){
+    stopPolling();
+  }
+}
+
+async function poll(){
+  if(!jobId) return;
+  try{
+    const d=await api("/api/status/"+jobId);
+    renderStatus(d);
+    await loadResults();
+  }catch(e){
+    $("statusMsg").innerHTML=`<span class="dot bad"></span>${esc(e.message)}`;
+  }
+}
+
+function startPolling(){
+  stopPolling(); poll(); timer=setInterval(poll,2500);
+}
+function stopPolling(){if(timer){clearInterval(timer);timer=null;}}
+
+$("startBtn").onclick=async()=>{
+  const category=$("category").value.trim();
+  const locations=getLocations();
+  const max_results=Number($("limit").value||25);
+  if(!category) return alert("اكتب نوع النشاط أولًا");
+  if(!locations.length) return alert("أضف مكانًا واحدًا على الأقل");
+
+  try{
+    const d=await api("/api/start-scrape",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({category,locations,max_results})
+    });
+    jobId=d.job_id; results=[]; renderLocationFilters(); renderTable(); startPolling();
+  }catch(e){alert(e.message)}
+};
+
+$("pauseBtn").onclick=async()=>{if(jobId)await api("/api/pause/"+jobId,{method:"POST"});poll()};
+$("resumeBtn").onclick=async()=>{if(jobId)await api("/api/resume/"+jobId,{method:"POST"});poll()};
+$("stopBtn").onclick=async()=>{if(jobId)await api("/api/stop/"+jobId,{method:"POST"});poll()};
+$("refreshBtn").onclick=poll;
+
+["searchFilter","locationFilter","sortBy","sortDir","minRating"].forEach(id=>$(id).addEventListener(id==="searchFilter"?"input":"change",renderTable));
+$("phoneOnly").onclick=()=>{phoneOnly=!phoneOnly;$("phoneOnly").style.borderColor=phoneOnly?"var(--primary)":"var(--line)";renderTable()};
+
+$("excelBtn").onclick=()=>{if(jobId)window.location="/api/download/"+jobId};
+$("csvBtn").onclick=()=>{
+  const arr=filteredSorted(); if(!arr.length)return;
+  const header=["مكان البحث","اسم النشاط","التصنيف","الهاتف","التقييم","المراجعات","العنوان","الموقع الإلكتروني","Google Maps"];
+  const rows=[header,...arr.map(r=>[r.search_location,r.business_name,r.category,r.phone,r.rating??"",r.reviews??"",r.address,r.website,r.maps_url])];
+  const csv=rows.map(row=>row.map(v=>`"${String(v??"").replaceAll('"','""')}"`).join(",")).join("\n");
+  const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="leadscout_filtered.csv";a.click();URL.revokeObjectURL(a.href);
+};
+
+$("locationFilter").addEventListener("change",renderTable);
+</script>
+</body>
+</html>
