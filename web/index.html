@@ -221,8 +221,11 @@ function esc(v){return String(v ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"
 function attr(v){return esc(v)}
 function norm(v){return String(v ?? "").trim().toLowerCase()}
 
+const API_BASE = "http://192.168.1.7:8000";
+
 async function api(url, options={}){
-  const r = await fetch(url, options);
+  const target = url.startsWith("http") ? url : `${API_BASE}${url}`;
+  const r = await fetch(target, options);
   let d = {};
   try{d=await r.json()}catch(e){}
   if(!r.ok) throw new Error(d.detail || "فشل الطلب");
@@ -426,7 +429,7 @@ $("refreshBtn").onclick=poll;
 ["searchFilter","locationFilter","sortBy","sortDir","minRating"].forEach(id=>$(id).addEventListener(id==="searchFilter"?"input":"change",renderTable));
 $("phoneOnly").onclick=()=>{phoneOnly=!phoneOnly;$("phoneOnly").style.borderColor=phoneOnly?"var(--primary)":"var(--line)";renderTable()};
 
-$("excelBtn").onclick=()=>{if(jobId)window.location="/api/download/"+jobId};
+$("excelBtn").onclick=()=>{if(jobId)window.location=API_BASE+"/api/download/"+jobId};
 $("csvBtn").onclick=()=>{
   const arr=filteredSorted(); if(!arr.length)return;
   const header=["مكان البحث","اسم النشاط","التصنيف","الهاتف","التقييم","المراجعات","العنوان","الموقع الإلكتروني","Google Maps"];
