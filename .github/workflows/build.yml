@@ -1,4 +1,4 @@
-name: Build LeadScout APK
+name: Build LeadScout Android
 
 on:
   workflow_dispatch:
@@ -13,25 +13,33 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
+      - name: Install dependencies
+        working-directory: app
+        run: npm ci
 
-      - name: Create Flutter app
-        run: flutter create --project-name lead_scout .
+      - name: Sync Capacitor Android
+        working-directory: app
+        run: npx cap sync android
 
       - name: Build APK
-        run: flutter build apk --release
+        working-directory: app/android
+        run: ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: LeadScout-APK
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: app/android/app/build/outputs/apk/debug/app-debug.apk
